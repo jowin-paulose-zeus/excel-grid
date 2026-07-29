@@ -2,6 +2,7 @@ import { CellModel } from "./CellModel";
 
 export class GridDataStore {
   private cells: Map<string, CellModel>;
+  
 
   constructor() {
     this.cells = new Map<string, CellModel>();

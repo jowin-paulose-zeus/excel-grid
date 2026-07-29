@@ -53,8 +53,8 @@ export class JsonDataLoader {
         id: index,
         firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
         lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-        age: Math.floor(Math.random() * 43) + 18,
-        salary: Math.floor(Math.random() * 90001) + 30000,
+        age: Math.floor(Math.random() * 41) + 18,
+        salary: Math.floor(Math.random() * 100000) + 50000,
       };
 
       employeeRecords.push(employee);

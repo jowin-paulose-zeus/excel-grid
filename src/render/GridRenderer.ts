@@ -1,6 +1,7 @@
 import type { ColumnModel } from "../data/ColumnModel";
 import type { GridDataStore } from "../data/GridDataStore";
 import type { ViewportManager } from "./ViewportManager";
+import type { SelectionManager } from "../selection/SelectionManager";
 
 export class GridRenderer {
   private readonly canvas: HTMLCanvasElement;
@@ -8,12 +9,14 @@ export class GridRenderer {
   private readonly columns: ColumnModel[];
   private readonly gridDataStore: GridDataStore;
   private readonly viewportManager: ViewportManager;
+  private readonly selectionManager: SelectionManager;
 
   constructor(
     canvas: HTMLCanvasElement,
     gridDataStore: GridDataStore,
     columns: ColumnModel[],
     viewportManager: ViewportManager,
+    selectionManager: SelectionManager,
   ) {
     this.canvas = canvas;
 
@@ -27,6 +30,7 @@ export class GridRenderer {
     this.gridDataStore = gridDataStore;
     this.columns = columns;
     this.viewportManager = viewportManager;
+    this.selectionManager = selectionManager;
   }
 
   private drawHeaderBackground(): void {
@@ -72,7 +76,7 @@ export class GridRenderer {
     }
 
     this.context.strokeStyle = "#d9d9d9";
-    this.context.lineWidth = 1;
+    this.context.lineWidth = 2;
     this.context.stroke();
   }
 
@@ -96,7 +100,7 @@ export class GridRenderer {
     }
 
     this.context.strokeStyle = "#d9d9d9";
-    this.context.lineWidth = 1;
+    this.context.lineWidth = 2;
     this.context.stroke();
   }
 
@@ -169,6 +173,56 @@ export class GridRenderer {
     }
   }
 
+  private drawSelection(): void {
+    const selection = this.selectionManager.getSelection();
+
+    if (selection === null) {
+      return;
+    }
+
+    const rowHeight = 24;
+    const columnWidth = 120;
+    const rowHeaderWidth = 60;
+    const columnHeaderHeight = 24;
+
+    const startRow = Math.min(selection.startRow, selection.endRow);
+
+    const endRow = Math.max(selection.startRow, selection.endRow);
+
+    const startColumn = Math.min(selection.startColumn, selection.endColumn);
+
+    const endColumn = Math.max(selection.startColumn, selection.endColumn);
+
+    const x =
+      rowHeaderWidth +
+      startColumn * columnWidth -
+      this.viewportManager.getScrollX();
+
+    const y =
+      columnHeaderHeight +
+      startRow * rowHeight -
+      this.viewportManager.getScrollY();
+
+    const width = (endColumn - startColumn + 1) * columnWidth;
+
+    const height = (endRow - startRow + 1) * rowHeight;
+
+    this.context.fillStyle = "#e2f0d9";
+
+    this.context.fillRect(x, y, width, height);
+
+    this.context.strokeStyle = "#107c41";
+    this.context.lineWidth = 3;
+
+    this.context.strokeRect(x, y, width, height);
+
+    this.context.fillStyle = "#107c41";
+
+    this.context.fillRect(x + width - 4, y + height - 4, 8, 8);
+
+    console.log(selection);
+  }
+
   private drawCellValues(): void {
     this.context.fillStyle = "#000000";
     this.context.font = "14px Arial";
@@ -232,6 +286,8 @@ export class GridRenderer {
     this.context.fillStyle = "#ffffff";
 
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.drawSelection();
 
     this.drawCellValues();
 

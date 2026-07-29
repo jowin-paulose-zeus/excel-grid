@@ -1,5 +1,5 @@
 import { Grid } from "./core/Grid";
-import "./style.css"
+import "./style.css";
 const canvas = document.createElement("canvas");
 
 canvas.width = 1920;

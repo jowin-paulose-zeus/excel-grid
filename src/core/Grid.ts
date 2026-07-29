@@ -43,21 +43,17 @@ export class Grid {
       (event: WheelEvent) => {
         event.preventDefault();
 
-        if (event.shiftKey) {
-          const newScrollX = this.viewportManager.getScrollX() + event.deltaY;
+        const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
 
-          this.viewportManager.setScrollPosition(
-            Math.max(0, newScrollX),
-            this.viewportManager.getScrollY(),
-          );
-        } else {
-          const newScrollY = this.viewportManager.getScrollY() + event.deltaY;
+        const verticalDelta = event.shiftKey ? 0 : event.deltaY;
 
-          this.viewportManager.setScrollPosition(
-            this.viewportManager.getScrollX(),
-            Math.max(0, newScrollY),
-          );
-        }
+        const newScrollX = this.viewportManager.getScrollX() + horizontalDelta;
+        const newScrollY = this.viewportManager.getScrollY() + verticalDelta;
+
+        this.viewportManager.setScrollPosition(
+          Math.max(0, newScrollX),
+          Math.max(0, newScrollY),
+        );
 
         this.gridRenderer.render();
       },

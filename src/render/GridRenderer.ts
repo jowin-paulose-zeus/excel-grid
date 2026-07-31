@@ -208,7 +208,9 @@ export class GridRenderer {
     const width = (endColumn - startColumn + 1) * columnWidth;
 
     const height = (endRow - startRow + 1) * rowHeight;
-
+    this.context.save();
+    this.context.rect(60, 24, this.canvas.width, this.canvas.height);
+    this.context.clip();
     if (selectionType === SelectionType.Row) {
       const y =
         24 + selection.startRow * 24 - this.viewportManager.getScrollY();
@@ -218,7 +220,7 @@ export class GridRenderer {
       this.context.fillRect(60, y, this.canvas.width - 60, 24);
 
       this.context.strokeStyle = "#107c41";
-      this.context.lineWidth = 3;
+      this.context.lineWidth = 1;
 
       this.context.strokeRect(60, y, this.canvas.width - 60, 24);
       console.log(selection);
@@ -234,27 +236,28 @@ export class GridRenderer {
       this.context.fillRect(x, 24, 120, this.canvas.height - 24);
 
       this.context.strokeStyle = "#107c41";
-      this.context.lineWidth = 3;
+      this.context.lineWidth = 1.5;
 
       this.context.strokeRect(x, 24, 120, this.canvas.height - 24);
       console.log(selection);
       return;
     }
 
-    this.context.fillStyle = "#e2f0d9";
+    this.context.fillStyle = "rgba(226, 240, 217,0.5)";
 
     this.context.fillRect(x, y, width, height);
 
     this.context.strokeStyle = "#0d8c46";
-    this.context.lineWidth = 3;
+    this.context.lineWidth = 1.5;
 
     this.context.strokeRect(x, y, width, height);
 
     this.context.fillStyle = "#095b2f";
 
-    this.context.fillRect(x + width - 4, y + height - 4, 8, 8);
+    this.context.fillRect(x + width - 2, y + height - 2, 4, 4);
 
     console.log(selection);
+    this.context.restore()
   }
 
   private drawCellValues(): void {
@@ -288,7 +291,9 @@ export class GridRenderer {
       this.columns.length - 1,
       firstVisibleColumn + visibleColumns,
     );
-
+    this.context.save();
+    this.context.rect(60, 24, this.canvas.width, this.canvas.height);
+    this.context.clip();
     for (let row = firstVisibleRow; row <= lastVisibleRow; row++) {
       for (
         let columnIndex = firstVisibleColumn;
@@ -312,6 +317,7 @@ export class GridRenderer {
         this.context.fillText(String(cell.value), x, y);
       }
     }
+    this.context.restore();
   }
 
   public render(): void {
@@ -321,10 +327,6 @@ export class GridRenderer {
 
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.drawSelection();
-
-    this.drawCellValues();
-
     this.drawHeaderBackground();
 
     this.drawRowHeaderBackground();
@@ -332,6 +334,10 @@ export class GridRenderer {
     this.drawHorizontalGridLines();
 
     this.drawVerticalGridLines();
+
+    this.drawSelection();
+
+    this.drawCellValues();
 
     this.drawColumnHeaders();
 

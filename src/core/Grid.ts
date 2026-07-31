@@ -5,6 +5,8 @@ import { ColumnModel } from "../data/ColumnModel";
 import { ViewportManager } from "../render/ViewportManager";
 import { GridRenderer } from "../render/GridRenderer";
 import { SelectionManager } from "../selection/SelectionManager";
+import { CommandManager } from "../commands/CommandManager";
+import { EditManager } from "../edit/EditManager";
 
 export class Grid {
   private readonly gridDataStore: GridDataStore;
@@ -14,6 +16,8 @@ export class Grid {
   private readonly viewportManager: ViewportManager;
   private readonly gridRenderer: GridRenderer;
   private readonly selectionManager: SelectionManager;
+  private commandManager: CommandManager;
+  private editManager: EditManager;
 
   constructor(canvas: HTMLCanvasElement) {
     this.gridDataStore = new GridDataStore();
@@ -38,6 +42,24 @@ export class Grid {
       this.selectionManager,
     );
     this.registerEvents(canvas);
+    this.commandManager = new CommandManager();
+    this.editManager = new EditManager(
+      this.gridDataStore,
+      this.selectionManager,
+      this.viewportManager,
+      this.commandManager,
+      () => this.gridRenderer.render()
+    );
+  }
+
+  private handleDoubleClick(): void {
+    const selection = this.selectionManager.getSelection();
+
+    if (selection === null) {
+      return;
+    }
+
+    this.editManager.beginEdit();
   }
 
   private handleCanvasClick(event: MouseEvent): void {
@@ -50,7 +72,31 @@ export class Grid {
     const rowHeight = 24;
     const columnWidth = 120;
 
-    if (mouseX < rowHeaderWidth || mouseY < columnHeaderHeight) {
+    if (mouseX < rowHeaderWidth && mouseY < columnHeaderHeight) {
+      return;
+    }
+
+    if (mouseX < rowHeaderWidth) {
+      const row = Math.floor(
+        (mouseY - columnHeaderHeight + this.viewportManager.getScrollY()) / 24,
+      );
+
+      this.selectionManager.selectRow(row);
+
+      this.gridRenderer.render();
+
+      return;
+    }
+
+    if (mouseY < columnHeaderHeight) {
+      const column = Math.floor(
+        (mouseX - rowHeaderWidth + this.viewportManager.getScrollX()) / 120,
+      );
+
+      this.selectionManager.selectColumn(column);
+
+      this.gridRenderer.render();
+
       return;
     }
 
@@ -71,12 +117,33 @@ export class Grid {
 
   private handleMouseDown(event: MouseEvent): void {
     this.selectionManager.beginSelection();
-
     this.handleCanvasClick(event);
   }
 
   private handleMouseUp(): void {
     this.selectionManager.endSelection();
+  }
+
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (this.editManager.isEditInProgress()) {
+      return;
+    }
+
+    if (event.key === "F2") {
+      event.preventDefault();
+
+      this.editManager.beginEdit();
+
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+
+      this.editManager.beginEdit();
+
+      return;
+    }
   }
 
   private registerEvents(canvas: HTMLCanvasElement): void {
@@ -103,13 +170,19 @@ export class Grid {
     );
     canvas.addEventListener("mousedown", (event: MouseEvent) => {
       this.handleMouseDown(event);
+      canvas.focus();
     });
-
     canvas.addEventListener("mouseup", () => {
       this.handleMouseUp();
     });
     canvas.addEventListener("mousemove", (event: MouseEvent) => {
       this.handleMouseMove(event);
+    });
+    canvas.addEventListener("dblclick", () => {
+      this.handleDoubleClick();
+    });
+    canvas.addEventListener("keydown", (event: KeyboardEvent) => {
+      this.handleKeyDown(event);
     });
   }
 
@@ -153,5 +226,25 @@ export class Grid {
     this.viewportManager.setScrollPosition(0, 0);
 
     this.gridRenderer.render();
+  }
+
+  public getCommandManager(): CommandManager {
+    return this.commandManager;
+  }
+
+  public getGridDataStore(): GridDataStore {
+    return this.gridDataStore;
+  }
+
+  public getSelectionManager(): SelectionManager {
+    return this.selectionManager;
+  }
+
+  public getViewportManager(): ViewportManager {
+    return this.viewportManager;
+  }
+
+  public getGridRenderer(): GridRenderer {
+    return this.gridRenderer;
   }
 }

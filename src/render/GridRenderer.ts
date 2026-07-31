@@ -2,6 +2,7 @@ import type { ColumnModel } from "../data/ColumnModel";
 import type { GridDataStore } from "../data/GridDataStore";
 import type { ViewportManager } from "./ViewportManager";
 import type { SelectionManager } from "../selection/SelectionManager";
+import { SelectionType } from "../selection/SelectionType";
 
 export class GridRenderer {
   private readonly canvas: HTMLCanvasElement;
@@ -175,6 +176,7 @@ export class GridRenderer {
 
   private drawSelection(): void {
     const selection = this.selectionManager.getSelection();
+    const selectionType = this.selectionManager.getSelectionType();
 
     if (selection === null) {
       return;
@@ -207,16 +209,48 @@ export class GridRenderer {
 
     const height = (endRow - startRow + 1) * rowHeight;
 
+    if (selectionType === SelectionType.Row) {
+      const y =
+        24 + selection.startRow * 24 - this.viewportManager.getScrollY();
+
+      this.context.fillStyle = "#e2f0d9";
+
+      this.context.fillRect(60, y, this.canvas.width - 60, 24);
+
+      this.context.strokeStyle = "#107c41";
+      this.context.lineWidth = 3;
+
+      this.context.strokeRect(60, y, this.canvas.width - 60, 24);
+      console.log(selection);
+      return;
+    }
+
+    if (selectionType === SelectionType.Column) {
+      const x =
+        60 + selection.startColumn * 120 - this.viewportManager.getScrollX();
+
+      this.context.fillStyle = "#e2f0d9";
+
+      this.context.fillRect(x, 24, 120, this.canvas.height - 24);
+
+      this.context.strokeStyle = "#107c41";
+      this.context.lineWidth = 3;
+
+      this.context.strokeRect(x, 24, 120, this.canvas.height - 24);
+      console.log(selection);
+      return;
+    }
+
     this.context.fillStyle = "#e2f0d9";
 
     this.context.fillRect(x, y, width, height);
 
-    this.context.strokeStyle = "#107c41";
+    this.context.strokeStyle = "#0d8c46";
     this.context.lineWidth = 3;
 
     this.context.strokeRect(x, y, width, height);
 
-    this.context.fillStyle = "#107c41";
+    this.context.fillStyle = "#095b2f";
 
     this.context.fillRect(x + width - 4, y + height - 4, 8, 8);
 

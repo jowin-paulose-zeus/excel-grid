@@ -22,13 +22,15 @@ export class EditManager {
   private editingRow: number;
   private editingColumn: number;
   private readonly onGridChanged: () => void;
+  private readonly focusCanvas: () => void;
 
   public constructor(
     gridDataStore: GridDataStore,
     selectionManager: SelectionManager,
     viewportManager: ViewportManager,
     commandManager: CommandManager,
-    onGridChanged: () => void
+    onGridChanged: () => void,
+    focusCanvas: () => void
   ) {
     this.gridDataStore = gridDataStore;
 
@@ -49,10 +51,12 @@ export class EditManager {
     this.editingRow = -1;
     this.editingColumn = -1;
     this.onGridChanged = onGridChanged;
+    this.focusCanvas = focusCanvas;
 
     this.initializeInput();
   }
   private initializeInput(): void {
+        
     this.inputElement.type = "text";
 
     this.inputElement.style.position = "absolute";
@@ -197,8 +201,11 @@ export class EditManager {
     this.hideInput();
 
     this.onGridChanged();
+
+    this.focusCanvas();
   }
   public cancelEdit(): void {
     this.hideInput();
+    this.focusCanvas();
   }
 }

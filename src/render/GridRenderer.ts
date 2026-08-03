@@ -3,11 +3,14 @@ import type { GridDataStore } from "../data/GridDataStore";
 import type { ViewportManager } from "./ViewportManager";
 import type { SelectionManager } from "../selection/SelectionManager";
 import { SelectionType } from "../selection/SelectionType";
+import { ColourScheme } from "../ColourScheme";
+import type { RowModel } from "../data/RowModel";
 
 export class GridRenderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly context: CanvasRenderingContext2D;
   private readonly columns: ColumnModel[];
+  private readonly rows: RowModel[];
   private readonly gridDataStore: GridDataStore;
   private readonly viewportManager: ViewportManager;
   private readonly selectionManager: SelectionManager;
@@ -16,6 +19,7 @@ export class GridRenderer {
     canvas: HTMLCanvasElement,
     gridDataStore: GridDataStore,
     columns: ColumnModel[],
+    rows: RowModel[],
     viewportManager: ViewportManager,
     selectionManager: SelectionManager,
   ) {
@@ -30,31 +34,32 @@ export class GridRenderer {
     this.context = context;
     this.gridDataStore = gridDataStore;
     this.columns = columns;
+    this.rows = rows;
     this.viewportManager = viewportManager;
     this.selectionManager = selectionManager;
   }
 
   private drawHeaderBackground(): void {
-    this.context.fillStyle = "#f1f3f4";
+    this.context.fillStyle = ColourScheme.HEADER_BACKGROUND_FILL;
 
     this.context.fillRect(0, 0, this.canvas.width, 24);
-    this.context.strokeStyle = "#d9d9d9";
+    this.context.strokeStyle = ColourScheme.GRID_STROKE;
     this.context.lineWidth = 1;
     this.context.strokeRect(0, 0, this.canvas.width, 24);
   }
   private drawRowHeaderBackground(): void {
-    this.context.fillStyle = "#f1f3f4";
+    this.context.fillStyle = ColourScheme.HEADER_BACKGROUND_FILL;
 
     this.context.fillRect(0, 0, 60, this.canvas.height);
-    this.context.strokeStyle = "#d9d9d9";
+    this.context.strokeStyle = ColourScheme.GRID_STROKE;
     this.context.lineWidth = 1;
     this.context.strokeRect(0, 0, 60, this.canvas.height);
   }
   private drawHeaderIntersection(): void {
-    this.context.fillStyle = "#f1f3f4";
+    this.context.fillStyle = ColourScheme.HEADER_BACKGROUND_FILL;
 
     this.context.fillRect(0, 0, 60, 24);
-    this.context.strokeStyle = "#d9d9d9";
+    this.context.strokeStyle = ColourScheme.GRID_STROKE;
     this.context.lineWidth = 1;
     this.context.strokeRect(0, 0, 60, 24);
   }
@@ -76,7 +81,7 @@ export class GridRenderer {
       this.context.lineTo(this.canvas.width, y);
     }
 
-    this.context.strokeStyle = "#d9d9d9";
+    this.context.strokeStyle = ColourScheme.GRID_STROKE;
     this.context.lineWidth = 2;
     this.context.stroke();
   }
@@ -100,7 +105,7 @@ export class GridRenderer {
       this.context.lineTo(x, this.canvas.width);
     }
 
-    this.context.strokeStyle = "#d9d9d9";
+    this.context.strokeStyle = ColourScheme.GRID_STROKE;
     this.context.lineWidth = 2;
     this.context.stroke();
   }
@@ -122,7 +127,7 @@ export class GridRenderer {
   }
 
   private drawColumnHeaders(): void {
-    this.context.fillStyle = "#000000";
+    this.context.fillStyle = ColourScheme.TEXT;
     this.context.font = "14px Arial";
     this.context.textBaseline = "middle";
     this.context.textAlign = "center";
@@ -151,7 +156,7 @@ export class GridRenderer {
   }
 
   private drawRowHeaders(): void {
-    this.context.fillStyle = "#000000";
+    this.context.fillStyle = ColourScheme.TEXT;
     this.context.font = "14px Arial";
     this.context.textBaseline = "middle";
 
@@ -208,21 +213,25 @@ export class GridRenderer {
     const width = (endColumn - startColumn + 1) * columnWidth;
 
     const height = (endRow - startRow + 1) * rowHeight;
+
     this.context.save();
+    this.context.beginPath();
     this.context.rect(60, 24, this.canvas.width, this.canvas.height);
     this.context.clip();
+
     if (selectionType === SelectionType.Row) {
       const y =
         24 + selection.startRow * 24 - this.viewportManager.getScrollY();
 
-      this.context.fillStyle = "#e2f0d9";
+      this.context.fillStyle = ColourScheme.SELCTION_FILL;
 
       this.context.fillRect(60, y, this.canvas.width - 60, 24);
 
-      this.context.strokeStyle = "#107c41";
+      this.context.strokeStyle = ColourScheme.SELECTION_STROKE;
       this.context.lineWidth = 1;
 
       this.context.strokeRect(60, y, this.canvas.width - 60, 24);
+      this.context.restore();
       console.log(selection);
       return;
     }
@@ -231,92 +240,92 @@ export class GridRenderer {
       const x =
         60 + selection.startColumn * 120 - this.viewportManager.getScrollX();
 
-      this.context.fillStyle = "#e2f0d9";
+      this.context.fillStyle = ColourScheme.SELCTION_FILL;
 
       this.context.fillRect(x, 24, 120, this.canvas.height - 24);
 
-      this.context.strokeStyle = "#107c41";
+      this.context.strokeStyle = ColourScheme.SELECTION_STROKE;
       this.context.lineWidth = 1.5;
 
       this.context.strokeRect(x, 24, 120, this.canvas.height - 24);
+      this.context.restore();
       console.log(selection);
       return;
     }
 
-    this.context.fillStyle = "rgba(226, 240, 217,0.5)";
+    this.context.fillStyle = ColourScheme.SELCTION_FILL;
 
     this.context.fillRect(x, y, width, height);
 
-    this.context.strokeStyle = "#0d8c46";
-    this.context.lineWidth = 1.5;
+    this.context.strokeStyle = ColourScheme.SELECTION_STROKE;
+    this.context.lineWidth = 1;
 
     this.context.strokeRect(x, y, width, height);
 
-    this.context.fillStyle = "#095b2f";
+    this.context.fillStyle = ColourScheme.SELCTION_FILL;
 
     this.context.fillRect(x + width - 2, y + height - 2, 4, 4);
+    this.context.restore();
 
     console.log(selection);
-    this.context.restore()
   }
 
   private drawCellValues(): void {
-    this.context.fillStyle = "#000000";
+    this.context.fillStyle = ColourScheme.TEXT;
     this.context.font = "14px Arial";
     this.context.textBaseline = "middle";
 
     const rowHeight = 24;
-
     const firstVisibleRow = Math.floor(
       this.viewportManager.getScrollY() / rowHeight,
     );
-
     const visibleRows = Math.ceil(
       this.viewportManager.getViewportHeight() / rowHeight,
     );
-
     const lastVisibleRow = firstVisibleRow + visibleRows;
 
     const defaultColumnWidth = 120;
-
     const firstVisibleColumn = Math.floor(
       this.viewportManager.getScrollX() / defaultColumnWidth,
     );
-
     const visibleColumns = Math.ceil(
       this.viewportManager.getViewportWidth() / defaultColumnWidth,
     );
-
     const lastVisibleColumn = Math.min(
       this.columns.length - 1,
       firstVisibleColumn + visibleColumns,
     );
+
     this.context.save();
     this.context.rect(60, 24, this.canvas.width, this.canvas.height);
     this.context.clip();
-    for (let row = firstVisibleRow; row <= lastVisibleRow; row++) {
-      for (
-        let columnIndex = firstVisibleColumn;
-        columnIndex <= lastVisibleColumn;
-        columnIndex++
-      ) {
-        const column = this.columns[columnIndex];
 
+    for (
+      let columnIndex = firstVisibleColumn;
+      columnIndex <= lastVisibleColumn;
+      columnIndex++
+    ) {
+      const column = this.columns[columnIndex];
+      const x =
+        column.index * column.width - this.viewportManager.getScrollX() + 69;
+
+      this.context.save();
+      this.context.beginPath();
+      this.context.rect(x,rowHeight,defaultColumnWidth - 13,this.canvas.height);
+      this.context.clip();
+      for (let row = firstVisibleRow; row <= lastVisibleRow; row++) {
         const cell = this.gridDataStore.getCell(row, column.index);
-
         if (cell === undefined) {
           continue;
         }
 
-        const x =
-          column.index * column.width - this.viewportManager.getScrollX() + 69;
-
         const y =
           (row + 1) * rowHeight - this.viewportManager.getScrollY() + 13;
-
         this.context.fillText(String(cell.value), x, y);
       }
+      this.context.restore();
     }
+
     this.context.restore();
   }
 

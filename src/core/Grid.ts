@@ -38,6 +38,7 @@ export class Grid {
       canvas,
       this.gridDataStore,
       this.columns,
+      this.rows,
       this.viewportManager,
       this.selectionManager,
     );
@@ -48,7 +49,8 @@ export class Grid {
       this.selectionManager,
       this.viewportManager,
       this.commandManager,
-      () => this.gridRenderer.render()
+      () => this.gridRenderer.render(),
+      () => canvas.focus()
     );
   }
 
@@ -125,6 +127,26 @@ export class Grid {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
+    if (event.ctrlKey && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+
+      this.commandManager.undo();
+
+      this.gridRenderer.render();
+
+      return;
+    }
+
+    if (event.ctrlKey && event.key.toLowerCase() === "y") {
+      event.preventDefault();
+
+      this.commandManager.redo();
+
+      this.gridRenderer.render();
+
+      return;
+    }
+
     if (this.editManager.isEditInProgress()) {
       return;
     }

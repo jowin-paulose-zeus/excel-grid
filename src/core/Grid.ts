@@ -38,7 +38,6 @@ export class Grid {
       canvas,
       this.gridDataStore,
       this.columns,
-      this.rows,
       this.viewportManager,
       this.selectionManager,
     );
@@ -50,7 +49,7 @@ export class Grid {
       this.viewportManager,
       this.commandManager,
       () => this.gridRenderer.render(),
-      () => canvas.focus()
+      () => canvas.focus(),
     );
   }
 

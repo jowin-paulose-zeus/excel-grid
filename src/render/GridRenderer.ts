@@ -4,13 +4,11 @@ import type { ViewportManager } from "./ViewportManager";
 import type { SelectionManager } from "../selection/SelectionManager";
 import { SelectionType } from "../selection/SelectionType";
 import { ColourScheme } from "../ColourScheme";
-import type { RowModel } from "../data/RowModel";
 
 export class GridRenderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly context: CanvasRenderingContext2D;
   private readonly columns: ColumnModel[];
-  private readonly rows: RowModel[];
   private readonly gridDataStore: GridDataStore;
   private readonly viewportManager: ViewportManager;
   private readonly selectionManager: SelectionManager;
@@ -19,7 +17,6 @@ export class GridRenderer {
     canvas: HTMLCanvasElement,
     gridDataStore: GridDataStore,
     columns: ColumnModel[],
-    rows: RowModel[],
     viewportManager: ViewportManager,
     selectionManager: SelectionManager,
   ) {
@@ -34,7 +31,6 @@ export class GridRenderer {
     this.context = context;
     this.gridDataStore = gridDataStore;
     this.columns = columns;
-    this.rows = rows;
     this.viewportManager = viewportManager;
     this.selectionManager = selectionManager;
   }

@@ -2,8 +2,8 @@ import { Grid } from "./core/Grid";
 import "./style.css";
 const canvas = document.createElement("canvas");
 
-canvas.width = 1920;
-canvas.height = 1080;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 canvas.tabIndex =0;
 
 document.body.appendChild(canvas);

@@ -9,6 +9,8 @@ import { CommandManager } from "../commands/CommandManager";
 import { EditManager } from "../edit/EditManager";
 import { ResizeColumnCommand } from "../commands/ResizeColumnCommand";
 import { ResizeRowCommand } from "../commands/ResizeRowCommand";
+import { SummaryCalculator } from "../summary/SummaryCalculator";
+import { StatusBar } from "../summary/SummaryStatusBar";
 
 export class Grid {
   private readonly gridDataStore: GridDataStore;
@@ -28,6 +30,8 @@ export class Grid {
   private resizingRowIndex: number;
   private resizeStartY: number;
   private originalRowHeight: number;
+  private readonly summaryCalculator: SummaryCalculator;
+  private readonly statusBar: StatusBar;
 
   constructor(canvas: HTMLCanvasElement) {
     this.gridDataStore = new GridDataStore();
@@ -74,6 +78,13 @@ export class Grid {
     this.resizingRowIndex = -1;
     this.resizeStartY = 0;
     this.originalRowHeight = 0;
+    this.summaryCalculator = new SummaryCalculator(
+      this.gridDataStore,
+      this.selectionManager,
+      this.rows,
+      this.columns,
+    );
+    this.statusBar = new StatusBar();
   }
 
   private handleDoubleClick(): void {
@@ -102,6 +113,7 @@ export class Grid {
         return;
       }
       this.selectionManager.selectRow(row);
+      this.updateSummary();
       this.gridRenderer.render();
       return;
     }
@@ -111,6 +123,7 @@ export class Grid {
         return;
       }
       this.selectionManager.selectColumn(column);
+      this.updateSummary();
       this.gridRenderer.render();
       return;
     }
@@ -120,6 +133,7 @@ export class Grid {
       return;
     }
     this.selectionManager.setSelection(row, column);
+    this.updateSummary();
     this.gridRenderer.render();
   }
 
@@ -202,22 +216,58 @@ export class Grid {
       this.gridRenderer.render();
       return;
     }
-
-    if (this.editManager.isEditInProgress()) {
+   if (this.editManager.isEditInProgress()) {
       return;
     }
-
-    if (event.key === "F2") {
+    if (event.key === "F2" || event.key === "Enter") {
       event.preventDefault();
       this.editManager.beginEdit();
       return;
     }
-
-    if (event.key === "Enter") {
-      event.preventDefault();
-      this.editManager.beginEdit();
+    let handled = true;
+    switch (event.key) {
+      case "ArrowUp":
+        this.selectionManager.moveSelection(
+          -1,
+          0,
+          this.rows.length,
+          this.columns.length,
+        );
+        break;
+      case "ArrowDown":
+        this.selectionManager.moveSelection(
+          1,
+          0,
+          this.rows.length,
+          this.columns.length,
+        );
+        break;
+      case "ArrowLeft":
+        this.selectionManager.moveSelection(
+          0,
+          -1,
+          this.rows.length,
+          this.columns.length,
+        );
+        break;
+      case "ArrowRight":
+        this.selectionManager.moveSelection(
+          0,
+          1,
+          this.rows.length,
+          this.columns.length,
+        );
+        break;
+      default:
+        handled = false;
+        break;
+    }
+    if (!handled) {
       return;
     }
+    event.preventDefault();
+    this.updateSummary();
+    this.gridRenderer.render();
   }
 
   private registerEvents(canvas: HTMLCanvasElement): void {
@@ -308,6 +358,7 @@ export class Grid {
       return;
     }
     this.selectionManager.updateSelection(row, column);
+    this.updateSummary();
     this.gridRenderer.render();
   }
 
@@ -372,6 +423,12 @@ export class Grid {
       }
     }
     return -1;
+  }
+
+  private updateSummary(): void {
+    const summary = this.summaryCalculator.calculate();
+
+    this.statusBar.update(summary);
   }
 
   public initialize(): void {

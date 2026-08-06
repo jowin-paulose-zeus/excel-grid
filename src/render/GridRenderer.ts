@@ -338,6 +338,47 @@ export class GridRenderer {
     this.context.restore();
   }
 
+  private drawHeaderSelection(): void {
+    const selection = this.selectionManager.getSelection();
+    const selectionType = this.selectionManager.getSelectionType();
+    if (selection === null) {
+      return;
+    }
+    const startRow = Math.min(selection.startRow, selection.endRow);
+    const endRow = Math.max(selection.startRow, selection.endRow);
+    const startColumn = Math.min(selection.startColumn, selection.endColumn);
+    const endColumn = Math.max(selection.startColumn, selection.endColumn);
+    this.context.fillStyle = ColourScheme.SELCTION_FILL;
+    this.context.strokeStyle = ColourScheme.SELECTION_STROKE;
+    this.context.lineWidth = 1;
+    if (
+      selectionType === SelectionType.Cell ||
+      selectionType === SelectionType.Row
+    ) {
+      for (let row = startRow; row <= endRow; row++) {
+        const y =
+          24 +
+          this.viewportManager.getRowOffset(row) -
+          this.viewportManager.getScrollY();
+        this.context.fillRect(0, y, 60, this.rows[row].height);
+        this.context.strokeRect(0, y, 60, this.rows[row].height);
+      }
+    }
+    if (
+      selectionType === SelectionType.Cell ||
+      selectionType === SelectionType.Column
+    ) {
+      for (let column = startColumn; column <= endColumn; column++) {
+        const x =
+          60 +
+          this.viewportManager.getColumnOffset(column) -
+          this.viewportManager.getScrollX();
+        this.context.fillRect(x, 0, this.columns[column].width, 24);
+        this.context.strokeRect(x, 0, this.columns[column].width, 24);
+      }
+    }
+  }
+
   public render(): void {
     this.viewportManager.rebuildColumnOffsets(this.columns);
     this.viewportManager.rebuildRowOffsets(this.rows);
@@ -351,6 +392,8 @@ export class GridRenderer {
     this.drawHeaderBackground();
 
     this.drawRowHeaderBackground();
+
+    this.drawHeaderSelection();
 
     this.drawHorizontalGridLines();
 

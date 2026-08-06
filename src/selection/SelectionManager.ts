@@ -7,7 +7,7 @@ export class SelectionManager {
   private selectionType: SelectionType;
 
   constructor() {
-    this.selectedRange = null;
+    this.selectedRange = new CellRange(0,0,0,0);
     this.isSelecting = false;
     this.selectionType = SelectionType.Cell;
   }
@@ -76,5 +76,25 @@ export class SelectionManager {
   }
   public getSelectionType(): SelectionType {
     return this.selectionType;
+  }
+  public moveSelection(
+    rowDelta: number,
+    columnDelta: number,
+    maxRows: number,
+    maxColumns: number,
+  ): void {
+    const selection = this.getSelection();
+    if (selection === null) {
+      return;
+    }
+    const newRow = Math.max(
+      0,
+      Math.min(maxRows - 1, selection.startRow + rowDelta),
+    );
+    const newColumn = Math.max(
+      0,
+      Math.min(maxColumns - 1, selection.startColumn + columnDelta),
+    );
+    this.setSelection(newRow, newColumn);
   }
 }

@@ -216,7 +216,7 @@ export class Grid {
       this.gridRenderer.render();
       return;
     }
-   if (this.editManager.isEditInProgress()) {
+    if (this.editManager.isEditInProgress()) {
       return;
     }
     if (event.key === "F2" || event.key === "Enter") {
@@ -266,6 +266,15 @@ export class Grid {
       return;
     }
     event.preventDefault();
+    const selection = this.selectionManager.getSelection();
+    if (selection !== null) {
+      this.viewportManager.ensureCellVisible(
+        selection.startRow,
+        selection.startColumn,
+        this.rows,
+        this.columns,
+      );
+    }
     this.updateSummary();
     this.gridRenderer.render();
   }

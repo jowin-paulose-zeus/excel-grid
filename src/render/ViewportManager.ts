@@ -134,4 +134,25 @@ export class ViewportManager {
     }
     return Math.min(this.columnOffsets.length - 1, left);
   }
+  public ensureCellVisible(
+    row: number,
+    column: number,
+    rows: RowModel[],
+    columns: ColumnModel[],
+  ): void {
+    const rowTop = this.getRowOffset(row);
+    const rowBottom = rowTop + rows[row].height;
+    const columnLeft = this.getColumnOffset(column);
+    const columnRight = columnLeft + columns[column].width;
+    if (rowTop < this.scrollY) {
+      this.scrollY = rowTop;
+    } else if (rowBottom > this.scrollY + this.viewportHeight - 54) {
+      this.scrollY = rowBottom - (this.viewportHeight - 54);
+    }
+    if (columnLeft < this.scrollX) {
+      this.scrollX = columnLeft;
+    } else if (columnRight > this.scrollX + this.viewportWidth - 60) {
+      this.scrollX = columnRight - (this.viewportWidth - 60);
+    }
+  }
 }
